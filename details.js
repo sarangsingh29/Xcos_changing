@@ -309,7 +309,7 @@ function CONST_m() {
 			var dec = new mxCodec();
 			var details = dec.decode(arguments[1]);
 			details.realParameters = new ScilabDouble();
-			details.exprs = sci2exp(c);
+			details.exprs = new ScilabString([sci2exp(c)]);
             return details;
         case "define":
 			c = [1];
@@ -325,7 +325,7 @@ function CONST_m() {
             model.dep_ut = new ScilabBoolean([false, false]);
 
             var gr_i = new ScilabString(["xstringb(orig(1),orig(2),\"CONST_m\",sz(1),sz(2));"]);
-            var exprs = sci2exp(c);
+            var exprs = new ScilabString([sci2exp(c)]);
             var block = new standard_define(new ScilabDouble([80, 80]), model, exprs, gr_i); // 1 -> 80
             block.graphics.style = new ScilabString(["CONST_m"]);
             var attributes = {
@@ -337,11 +337,12 @@ function CONST_m() {
 				blockName: "CONST_m",
 				blockElementName: "CONST_m"
             };
-            return new BasicBlock(attributes, new ScilabDouble(c), exprs);
+            return new BasicBlock(attributes, model.rpar, exprs);
     }
 }
 
 function ANDLOG_f() {
+    
     var model = scicos_model();
     model.sim = new ScilabString(["andlog"]);
     model.out = new ScilabDouble([1]);
@@ -364,135 +365,278 @@ function ANDLOG_f() {
 }
 
 function ANDBLK() {
-    var andlog = ANDLOG_f("define");
-    andlog.graphics.orig = new ScilabDouble([194, 133]);
-    andlog.graphics.sz = new ScilabDouble([60,60]);
-    andlog.graphics.flip = new ScilabBoolean([true]);
-    andlog.graphics.pout = new ScilabDouble([9]);
-    andlog.graphics.pein = new ScilabDouble([4], [11]);
-	andlog.model.uid = new ScilabString(["7"]);
-	andlog.doc = list(new ScilabString(["7"]));
+    switch(arguments[0])
+    {
+        case "define":
+            var andlog = ANDLOG_f("define");
+            andlog.graphics.orig = new ScilabDouble([194, 133]);
+            andlog.graphics.sz = new ScilabDouble([60,60]);
+            andlog.graphics.flip = new ScilabBoolean([true]);
+            andlog.graphics.pout = new ScilabDouble([9]);
+            andlog.graphics.pein = new ScilabDouble([4], [11]);
+        	andlog.model.uid = new ScilabString(["7"]);
+        	andlog.doc = list(new ScilabString(["7"]));
+        
+            var input_port1 = CLKIN_f("define");
+            input_port1.graphics.orig = new ScilabDouble([149, 287]);
+            input_port1.graphics.sz = new ScilabDouble([20, 20]);
+            input_port1.graphics.flip = new ScilabBoolean([true]);
+            input_port1.graphics.exprs = new ScilabString(["1"]);
+            input_port1.graphics.peout = new ScilabDouble([4]);
+            input_port1.model.ipar = new ScilabDouble([1]);
+        	input_port1.model.uid = new ScilabString(["8"]);
+        	input_port1.doc = list(new ScilabString(["8"]));
+        
+            var output_port = CLKOUT_f("define");
+            output_port.graphics.orig = new ScilabDouble([450, 83]);
+            output_port.graphics.sz = new ScilabDouble([20, 20]);
+            output_port.graphics.flip = new ScilabBoolean([true]);
+            output_port.graphics.exprs = new ScilabString(["1"]);
+            output_port.graphics.pein = new ScilabDouble([8]);
+            output_port.model.ipar = new ScilabDouble([1]);
+        	output_port.model.uid = new ScilabString(["9"]);
+        	output_port.doc = list(new ScilabString(["9"]));
+        
+            var input_port2 = CLKIN_f("define");
+            input_port2.graphics.orig = new ScilabDouble([141, 330]);
+            input_port2.graphics.sz = new ScilabDouble([20, 20]);
+            input_port2.graphics.flip = new ScilabBoolean([true]);
+            input_port2.graphics.exprs = new ScilabString(["2"]);
+            input_port2.graphics.peout = new ScilabDouble([6]);
+            input_port2.model.ipar = new ScilabDouble([2]);
+        	input_port2.model.uid = new ScilabString(["10"]);
+        	input_port2.doc = list(new ScilabString(["10"]));
+        
+            var ifthel = IFTHEL_f("define");
+            ifthel.graphics.orig = new ScilabDouble([331, 137]);
+            ifthel.graphics.sz = new ScilabDouble([60, 60]);
+            ifthel.graphics.flip = new ScilabBoolean([true]);
+            ifthel.graphics.pin = new ScilabDouble([9]);
+            ifthel.graphics.pein = new ScilabDouble([12]);
+            ifthel.graphics.peout = new ScilabDouble([8], [0]);
+        	ifthel.model.uid = new ScilabString(["11"]);
+        	ifthel.doc = list(new ScilabString(["11"]));
+        
+        
+            var split = CLKSPLIT_f("define");
+            split.graphics.orig = new ScilabDouble([234, 275.78348]);
+            split.graphics.pein = new ScilabDouble([6]);
+            split.graphics.peout = new ScilabDouble([11], [12]);
+        	split.model.uid = new ScilabString(["12"]);
+        	split.doc = list(new ScilabString(["12"]));
+        
+            var diagram = scicos_diagram();
+            diagram.objs.push(andlog);
+            diagram.objs.push(input_port1);
+            diagram.objs.push(output_port);
+        	diagram.objs.push(input_port2);
+            diagram.objs.push(ifthel);
+            diagram.objs.push(split);
+            diagram.objs.push(scicos_link({
+                xx: new ScilabDouble([169], [214], [214]),
+                yy: new ScilabDouble([297], [297], [198.71]),
+                ct: new ScilabDouble([5, -1]),
+                from: new ScilabDouble([2, 1, 0]),
+                to: new ScilabDouble([1, 1, 1])
+            }));
+            diagram.objs.push(scicos_link({
+                xx: new ScilabDouble([161], [234], [234]),
+                yy: new ScilabDouble([340], [340], [275.78]),
+                ct: new ScilabDouble([5, -1]),
+                from: new ScilabDouble([4, 1, 0]),
+                to: new ScilabDouble([6, 1, 1])
+            }));
+            diagram.objs.push(scicos_link({
+                xx: new ScilabDouble([351], [351], [450]),
+                yy: new ScilabDouble([131.29], [93], [93]),
+                ct: new ScilabDouble([5, -1]),
+                from: new ScilabDouble([5, 1, 0]),
+                to: new ScilabDouble([3, 1, 1])
+            }));
+            diagram.objs.push(scicos_link({
+                xx: new ScilabDouble([262.57], [322.43]),
+                yy: new ScilabDouble([163], [167]),
+                ct: new ScilabDouble([1, 1]),
+                from: new ScilabDouble([1, 1, 0]),
+                to: new ScilabDouble([5, 1, 1])
+            }));
+            diagram.objs.push(scicos_link({
+                xx: new ScilabDouble([234], [234]),
+                yy: new ScilabDouble([275.78], [198.71]),
+                ct: new ScilabDouble([5, -1]),
+                from: new ScilabDouble([6, 1, 0]),
+                to: new ScilabDouble([1, 2, 1])
+            }));
+            diagram.objs.push(scicos_link({
+                xx: new ScilabDouble([234], [361], [361]),
+                yy: new ScilabDouble([275.78], [275.78], [202.71]),
+                ct: new ScilabDouble([5, -1]),
+                from: new ScilabDouble([6, 2, 0]),
+                to: new ScilabDouble([5, 1, 1])
+            }));
+            var x = scicos_block();
+            x.gui = new ScilabString(["ANDBLK"]);
+            x.graphics.sz = new ScilabDouble([2, 2]);
+            x.graphics.gr_i = new ScilabDouble();
+            x.graphics.pein = new ScilabDouble([0, 0]);
+            x.graphics.peout = new ScilabDouble([0]);
+            x.model.sim = new ScilabString(["csuper"]);
+            x.model.evtin = new ScilabDouble([1, 1]);
+            x.model.evtout = new ScilabDouble([1]);
+            x.model.blocktype = new ScilabString(["h"]);
+            x.model.firing = new ScilabBoolean([false]);
+            x.model.dep_ut = new ScilabBoolean([false, false]);
+            x.model.rpar = diagram;
+            var attributes = {
+                style: "ANDBLK",
+                simulationFunctionName: "csuper",
+                simulationFunctionType: "DEFAULT",
+                blockType: "h",
+                interfaceFunctionName: "ANDBLK",
+        		blockName: "ANDBLK",
+        		blockElementName: "ANDBLK"
+            };
+            return new BasicBlock(attributes, x.model.rpar, x.graphics.exprs);
+        
+        case "details":
+            return x;
+    }
+}
 
-    var input_port1 = CLKIN_f("define");
-    input_port1.graphics.orig = new ScilabDouble([149, 287]);
-    input_port1.graphics.sz = new ScilabDouble([20, 20]);
-    input_port1.graphics.flip = new ScilabBoolean([true]);
-    input_port1.graphics.exprs = new ScilabString(["1"]);
-    input_port1.graphics.peout = new ScilabDouble([4]);
-    input_port1.model.ipar = new ScilabDouble([1]);
-	input_port1.model.uid = new ScilabString(["8"]);
-	input_port1.doc = list(new ScilabString(["8"]));
+var win=-1;
+var wdim=[[600],[400]];
+var wpos=[[-1],[-1]];
+var clrs=[[1],[3],[5],[7],[9],[11],[13],[15]];
+var N=2;
+var ymin=-15;
+var ymax=15;
+var per=30;
+function CFSCOPE() {
+    switch(arguments[0])
+    {
+        case "define":
+            var model=scicos_model();
+            model.sim=list(new ScilabString(["cfscope"]),new ScilabDouble([4]));
+            model.evtin=new ScilabDouble([1]);
+            model.rpar=new ScilabDouble([0],[ymin],[ymax],[per]);
+            model.ipar=new ScilabDouble([win],[1],[N],[clrs],[wpos],[wdim],[1],[1]);
+            model.blocktype=new ScilabString(["c"]);
+            model.dep_ut=new ScilabBoolean([true,false]);
+            var  exprs=new ScilabString([clrs.toString().replace(/,/g, " ")],
+            [win],
+            [sci2exp([])],
+            [sci2exp(wdim)],
+            [ymin],
+            [ymax],
+            [per],
+            [N],
+            [1]);
+            var gr_i = list(new ScilabString(["xstringb(orig(1),orig(2),\"CFSCOPE\",sz(1),sz(2));"]),new ScilabDouble([8]));
+            var x = new standard_define(new ScilabDouble([80, 80]), model, exprs, gr_i); // 2 -> 80
+            x.graphics.style = new ScilabString(["CFSCOPE"]);
+            var attributes = {
+                style: "CFSCOPE",
+                simulationFunctionName: "cfscope",
+                simulationFunctionType: "C_OR_FORTRAN",
+                dependsOnU: "1",
+                interfaceFunctionName: "CFSCOPE",
+        		blockName: "CFSCOPE",
+        		blockElementName: "CFSCOPE"
+            };
+            return new BasicBlock(attributes, model.rpar, exprs);
+    }
+}
 
-    var output_port = CLKOUT_f("define");
-    output_port.graphics.orig = new ScilabDouble([450, 83]);
-    output_port.graphics.sz = new ScilabDouble([20, 20]);
-    output_port.graphics.flip = new ScilabBoolean([true]);
-    output_port.graphics.exprs = new ScilabString(["1"]);
-    output_port.graphics.pein = new ScilabDouble([8]);
-    output_port.model.ipar = new ScilabDouble([1]);
-	output_port.model.uid = new ScilabString(["9"]);
-	output_port.doc = list(new ScilabString(["9"]));
+function CLOCK_c() {
+    var evtdly = EVTDLY_c("define");
+    evtdly.graphics.orig=new ScilabDouble([320,232]);
+    evtdly.graphics.sz=new ScilabDouble([40,40]);
+    evtdly.graphics.flip=new ScilabBoolean([true]);
+    evtdly.graphics.exprs=new ScilabString(["0.1"],["0.1"]);
+    evtdly.graphics.pein=new ScilabDouble([6]);
+    evtdly.graphics.peout=new ScilabDouble([3]);
+    evtdly.model.rpar=new ScilabDouble([0.1],[0.1]);
+    evtdly.model.firing=new ScilabDouble([0.1]);
 
-    var input_port2 = CLKIN_f("define");
-    input_port2.graphics.orig = new ScilabDouble([141, 330]);
-    input_port2.graphics.sz = new ScilabDouble([20, 20]);
-    input_port2.graphics.flip = new ScilabBoolean([true]);
-    input_port2.graphics.exprs = new ScilabString(["2"]);
-    input_port2.graphics.peout = new ScilabDouble([6]);
-    input_port2.model.ipar = new ScilabDouble([2]);
-	input_port2.model.uid = new ScilabString(["10"]);
-	input_port2.doc = list(new ScilabString(["10"]));
+    var output_port=CLKOUT_f("define");
+    output_port.graphics.orig=new ScilabDouble([399,162]);
+    output_port.graphics.sz=new ScilabDouble([20,20]);
+    output_port.graphics.flip=new ScilabBoolean([true]);
+    output_port.graphics.exprs=new ScilabString(["1"]);
+    output_port.graphics.pein=new ScilabDouble([5]);
+    output_port.model.ipar=new ScilabDouble([1]);
 
-    var ifthel = IFTHEL_f("define");
-    ifthel.graphics.orig = new ScilabDouble([331, 137]);
-    ifthel.graphics.sz = new ScilabDouble([60, 60]);
-    ifthel.graphics.flip = new ScilabBoolean([true]);
-    ifthel.graphics.pin = new ScilabDouble([9]);
-    ifthel.graphics.pein = new ScilabDouble([12]);
-    ifthel.graphics.peout = new ScilabDouble([8], [0]);
-	ifthel.model.uid = new ScilabString(["11"]);
-	ifthel.doc = list(new ScilabString(["11"]));
+    var split=CLKSPLIT_f("define");
+    split.graphics.orig=new ScilabDouble([380.71066],[172]);
+    split.graphics.pein=new ScilabDouble([3]);
+    split.graphics.peout=new ScilabDouble([5],[6]);
 
-
-    var split = CLKSPLIT_f("define");
-    split.graphics.orig = new ScilabDouble([234, 275.78348]);
-    split.graphics.pein = new ScilabDouble([6]);
-    split.graphics.peout = new ScilabDouble([11], [12]);
-	split.model.uid = new ScilabString(["12"]);
-	split.doc = list(new ScilabString(["12"]));
-
-    var diagram = scicos_diagram();
-    diagram.objs.push(andlog);
-    diagram.objs.push(input_port1);
+    var diagram=scicos_diagram();
     diagram.objs.push(output_port);
-	diagram.objs.push(input_port2);
-    diagram.objs.push(ifthel);
+    diagram.objs.push(evtdly);
+    diagram.objs.push(scicos_link({
+        xx: new ScilabDouble([340], [340],[380.71]),
+        yy: new ScilabDouble([226.29],[172],[172]),
+        ct: new ScilabDouble([5, -1]),
+        from: new ScilabDouble([2, 1]),
+        to: new ScilabDouble([4, 1])
+    }));
     diagram.objs.push(split);
     diagram.objs.push(scicos_link({
-        xx: new ScilabDouble([169], [214], [214]),
-        yy: new ScilabDouble([297], [297], [198.71]),
+        xx: new ScilabDouble([380.71],[399]),
+        yy: new ScilabDouble([172],[172]),
         ct: new ScilabDouble([5, -1]),
-        from: new ScilabDouble([2, 1, 0]),
-        to: new ScilabDouble([1, 1, 1])
+        from: new ScilabDouble([4, 1]),
+        to: new ScilabDouble([1, 1])
     }));
     diagram.objs.push(scicos_link({
-        xx: new ScilabDouble([161], [234], [234]),
-        yy: new ScilabDouble([340], [340], [275.78]),
+        xx: new ScilabDouble([380.71],[380.71],[340],[340]),
+        yy: new ScilabDouble([172],[302],[302],[277.71]),
         ct: new ScilabDouble([5, -1]),
-        from: new ScilabDouble([4, 1, 0]),
-        to: new ScilabDouble([6, 1, 1])
+        from: new ScilabDouble([4, 2]),
+        to: new ScilabDouble([2, 1])
     }));
-    diagram.objs.push(scicos_link({
-        xx: new ScilabDouble([351], [351], [450]),
-        yy: new ScilabDouble([131.29], [93], [93]),
-        ct: new ScilabDouble([5, -1]),
-        from: new ScilabDouble([5, 1, 0]),
-        to: new ScilabDouble([3, 1, 1])
-    }));
-    diagram.objs.push(scicos_link({
-        xx: new ScilabDouble([262.57], [322.43]),
-        yy: new ScilabDouble([163], [167]),
-        ct: new ScilabDouble([1, 1]),
-        from: new ScilabDouble([1, 1, 0]),
-        to: new ScilabDouble([5, 1, 1])
-    }));
-    diagram.objs.push(scicos_link({
-        xx: new ScilabDouble([234], [234]),
-        yy: new ScilabDouble([275.78], [198.71]),
-        ct: new ScilabDouble([5, -1]),
-        from: new ScilabDouble([6, 1, 0]),
-        to: new ScilabDouble([1, 2, 1])
-    }));
-    diagram.objs.push(scicos_link({
-        xx: new ScilabDouble([234], [361], [361]),
-        yy: new ScilabDouble([275.78], [275.78], [202.71]),
-        ct: new ScilabDouble([5, -1]),
-        from: new ScilabDouble([6, 2, 0]),
-        to: new ScilabDouble([5, 1, 1])
-    }));
-    var x = scicos_block();
-    x.gui = new ScilabString(["ANDBLK"]);
-    x.graphics.sz = new ScilabDouble([2, 2]);
-    x.graphics.gr_i = new ScilabDouble();
-    x.graphics.pein = new ScilabDouble([0, 0]);
-    x.graphics.peout = new ScilabDouble([0]);
-    x.model.sim = new ScilabString(["csuper"]);
-    x.model.evtin = new ScilabDouble([1, 1]);
-    x.model.evtout = new ScilabDouble([1]);
-    x.model.blocktype = new ScilabString(["h"]);
-    x.model.firing = new ScilabBoolean([false]);
-    x.model.dep_ut = new ScilabBoolean([false, false]);
-    x.model.rpar = diagram;
+    var x=scicos_block();
+    x.gui=new ScilabString(["CLOCK_c"]);
+    x.graphics.sz=new ScilabDouble([2,2]);
+    x.graphics.gr_i=new ScilabString([]);
+    x.graphics.peout=new ScilabDouble([0]);
+    x.model.sim=new ScilabString(["csuper"]);
+    x.model.evtout=new ScilabDouble([1]);
+    x.model.blocktype=new ScilabString(["h"]);
+    x.model.firing=new ScilabBoolean([false]);
+    x.model.dep_ut=new ScilabBoolean([false, false]);
+    x.model.rpar=diagram;
+
     var attributes = {
-        style: "ANDBLK",
+        style: "CLOCK_c",
         simulationFunctionName: "csuper",
         simulationFunctionType: "DEFAULT",
         blockType: "h",
-        interfaceFunctionName: "ANDBLK",
-		blockName: "ANDBLK",
-		blockElementName: "ANDBLK"
+        interfaceFunctionName: "CLOCK_c",
+		blockName: "CLOCK_c",
+		blockElementName: "CLOCK_c"
     };
     return new BasicBlock(attributes, x.model.rpar, x.graphics.exprs);
+}
+
+function EVTDLY_c() {
+        var dt=0.1;
+        var ff=0.0;
+        var model=scicos_model()
+        model.sim=list(new ScilabString(["evtdly4"]),new ScilabDouble([4]));
+        model.evtin=new ScilabDouble([1]);
+        model.evtout=new ScilabDouble([1]);
+        model.rpar=new ScilabDouble([dt],[ff]);
+        model.blocktype=new ScilabString(["d"]);
+        model.firing=new ScilabDouble([ff]);
+        model.dep_ut=new ScilabBoolean([false,false]);
+
+        var exprs=new ScilabString([dt],[ff]);
+        var gr_i = new ScilabString(["xstringb(orig(1),orig(2),\"EVTDLY_c\",sz(1),sz(2));"]);
+        var block = new standard_define(new ScilabDouble([80, 80]), model, new ScilabDouble(), gr_i); // 3,2 -> 80
+
+        return block;
 }
 
 function CLKIN_f() {
@@ -614,8 +758,22 @@ function BasicBlock() {
 
 
 function sci2exp(c) {
-    if (c.length == 1)
-        return new ScilabString([c.toString()]);
-    else
-        return new ScilabString("[" + c.toString() + "]");
+    if(c.length== 0)
+        return "[]";
+    else if (c.length == 1)
+        return c.toString();
+    else {
+        var result = "[";
+        for(var i = 0; i < c.length; i++) {
+            if(typeof c[i].length === 'undefined') {
+                result += c[i] + ",";
+            }
+            else {
+                result += c[i][0] + ";";
+            }
+        }
+        result = result.substring(0, result.length - 1);
+        result += "]";
+        return result;
+    }
 }

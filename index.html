@@ -172,6 +172,7 @@
                             showModalWindow(this, 'Properties', content, 400, 300);
                             */
                             showPropertiesWindow(graph, cell);
+                            
                         }
                     }
 
@@ -453,7 +454,8 @@
 
         function showPropertiesWindow(graph, cell) {
 
-            var defaultProperties = CONST_m("get");
+            var name = cell.getAttribute('blockName');
+            var defaultProperties = window[name]("get");
 			/*{
                 nbr_curves: ["Number of curves", 1],
                 clrs: ["color (>0) or mark (<0)", [1, 2, 3, 4, 5, 6, 7, 13]],
@@ -536,10 +538,12 @@
                         propertiesObject[key] = document.getElementById(key.toString()).value;
                     }
                 }
-				console.log(cell.value);
-				var details = CONST_m("set",cell.value,propertiesObject);
-				var enc = mxCodec();
+                
+                //calling with "set"
+				var details = window[name]("set",cell.value,propertiesObject);
+				var enc = new mxCodec();
 				var node = enc.encode(details);
+				cell.value = node;
 				
             };
             myform.appendChild(btn);
@@ -677,6 +681,17 @@
 
                     if (name == 'ANDBLK') {
                         var details = ANDBLK("define");
+						var enc = new mxCodec(mxUtils.createXmlDocument());
+						var node = enc.encode(details);
+						var ret_data = ANDBLK("details");
+						console.log(ret_data);
+						//node.setAttribute('label',label);
+						var temp=enc.encode(parent);
+						node.setAttribute('parent',temp.getAttribute('id'));
+                        v1 = graph.insertVertex(parent, null, node, x, y, 80, 80, 'ANDBLK');
+                        createPorts(graph, v1, [], ['CONTROL', 'CONTROL'], [], ['COMMAND']);
+                    } else if(name == 'CFSCOPE') {
+                        var details = CFSCOPE("define");
 						var enc = new mxCodec(mxUtils.createXmlDocument());
 						var node = enc.encode(details);
 						//node.setAttribute('label',label);
@@ -822,7 +837,13 @@
 
                     // EVENTS
                     else if (name == 'CLOCK_c') {
-                        v1 = graph.insertVertex(parent, null, label, x, y, 80, 80, 'CLOCK_c');
+                        var details = CLOCK_c("define");
+						var enc = new mxCodec(mxUtils.createXmlDocument());
+						var node = enc.encode(details);
+						//node.setAttribute('label',label);
+						var temp=enc.encode(parent);
+						node.setAttribute('parent',temp.getAttribute('id'));
+                        v1 = graph.insertVertex(parent, null, node, x, y, 80, 80, 'CLOCK_c');
                         createPorts(graph, v1, [], [], [], ['COMMAND']);
                     } else if (name == 'SampleCLK') {
                         v1 = graph.insertVertex(parent, null, label, x, y, 80, 80, 'SampleCLK');
