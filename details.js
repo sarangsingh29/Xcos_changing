@@ -519,7 +519,7 @@ function CFSCOPE() {
             model.sim=list(new ScilabString(["cfscope"]),new ScilabDouble([4]));
             model.evtin=new ScilabDouble([1]);
             model.rpar=new ScilabDouble([0],[ymin],[ymax],[per]);
-            model.ipar=new ScilabDouble([win],[1],[N],[clrs],[wpos],[wdim],[1],[1]);
+            model.ipar=new ScilabDouble([win],[1],[N],...clrs,...wpos,...wdim,[1],[1]);
             model.blocktype=new ScilabString(["c"]);
             model.dep_ut=new ScilabBoolean([true,false]);
             var  exprs=new ScilabString([clrs.toString().replace(/,/g, " ")],
@@ -541,7 +541,8 @@ function CFSCOPE() {
                 dependsOnU: "1",
                 interfaceFunctionName: "CFSCOPE",
         		blockName: "CFSCOPE",
-        		blockElementName: "CFSCOPE"
+        		blockElementName: "CFSCOPE",
+        		integerParameters: model.ipar
             };
             return new BasicBlock(attributes, model.rpar, exprs);
     }
@@ -567,7 +568,7 @@ function CLOCK_c() {
     output_port.model.ipar=new ScilabDouble([1]);
 
     var split=CLKSPLIT_f("define");
-    split.graphics.orig=new ScilabDouble([380.71066],[172]);
+    split.graphics.orig=new ScilabDouble([380.71066,172]);
     split.graphics.pein=new ScilabDouble([3]);
     split.graphics.peout=new ScilabDouble([5],[6]);
 
@@ -746,7 +747,7 @@ function BasicBlock() {
     this.visible = options.visible || "";
     this.exprs = arguments[2] || "";
     this.realParameters = arguments[1] || "";
-    this.integerParameters = new ScilabDouble();
+    this.integerParameters = options.integerParameters || new ScilabDouble();
     this.objectsParameters = list();
     this.nbZerosCrossing = new ScilabDouble([0]);
     this.nmode = new ScilabDouble([0]);

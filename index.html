@@ -905,7 +905,7 @@
 						var temp=enc.encode(parent);
 						node.setAttribute('parent',temp.getAttribute('id'));
                         v1 = graph.insertVertex(parent, null, node, x, y, 80, 80, 'ANDBLK');
-                        createPorts(graph, v1, [], ['CONTROL', 'CONTROL'], [], ['COMMAND']);
+                        createPorts(graph, v1, [], ['CONTROL'], [], []);
                     }
                     // EVENTS
                     else if (name == 'CLOCK_c') {
