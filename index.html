@@ -28,12 +28,34 @@
     <script type="text/javascript" src="details.js"></script>
     <script type="text/javascript" src="json2.js"></script>
     <script type="text/javascript">
+
+        /*
+            Maverick
+            This method is used for loading the stylesheet from the file.
+            Reference: http://www.w3schools.com/xsl/xsl_client.asp
+        */
+
+        function loadXMLDoc(filename) {
+             if (window.ActiveXObject) {
+                 xhttp = new ActiveXObject("Msxml2.XMLHTTP");
+             } else {
+                 xhttp = new XMLHttpRequest();
+             }
+             xhttp.open("GET", filename, false);
+             try {
+                 xhttp.responseType = "msxml-document"
+             } catch (err) {}
+             xhttp.send("");
+             return xhttp.responseXML;
+         }
+
         function main(container, outline, toolbar, sidebar, status) {
             // Checks if the browser is supported
             if (!mxClient.isBrowserSupported()) {
                 // Displays an error message if the browser is not supported.
                 mxUtils.error('Browser is not supported!', 200, false);
             } else {
+               
                 // If connect preview is not moved away then getCellAt is used to detect the cell under
                 // the mouse if the mouse is over the preview shape in IE (no event transparency), ie.
                 // the built-in hit-detection of the HTML document will not be used in this case.
@@ -77,6 +99,7 @@
                 var editor = new mxEditor();
                 var graph = editor.graph;
                 var model = graph.getModel();
+
 
                 graph.setPanning(true);
                 graph.setConnectable(true);
@@ -172,7 +195,6 @@
                             showModalWindow(this, 'Properties', content, 400, 300);
                             */
                             showPropertiesWindow(graph, cell);
-                            
                         }
                     }
 
@@ -331,18 +353,68 @@
 
                 toolbar.appendChild(spacer.cloneNode(true));
 
+                /*
+                    Maverick
+                    Defining a variable to used by both the export buttons.
+                    This variable contains the value of the created XML and 
+                    is subsequently used by the ExportXCOS button.
+                */
+
+                var xmlFromExportXML=null;
+
                 // Defines a new export action
-                editor.addAction('export', function(editor, cell) {
+                editor.addAction('exportXML', function(editor, cell) {
                     var textarea = document.createElement('textarea');
                     textarea.style.width = '400px';
                     textarea.style.height = '400px';
+
                     var enc = new mxCodec(mxUtils.createXmlDocument());
                     var node = enc.encode(editor.graph.getModel());
+
+                   
+                    //console.log(mxUtils.getPrettyXml(node));
                     textarea.value = mxUtils.getPrettyXml(node);
+                    xmlFromExportXML=mxUtils.getXml(node);
                     showModalWindow(graph, 'XML', textarea, 410, 440);
                 });
 
-                addToolbarButton(editor, toolbar, 'export', 'Export', 'images/export1.png');
+               /* Maverick
+                Reference: http://www.w3schools.com/xsl/xsl_client.asp*/
+
+                editor.addAction('exportXcos', function() {
+                    editor.execute('exportXML');
+                    if(xmlFromExportXML==null) alert('First create the XML file.');
+                    else
+                    {
+                        /* 
+                         Maverick
+                         Adding <mxGraphModel> tag to make up for the missing tag.
+                        */
+
+                        var xml=mxUtils.parseXml("<mxGraphModel>"+xmlFromExportXML+"</mxGraphModel>");
+
+                        var xsl=loadXMLDoc("finalmodsheet.xsl");
+
+                        xsltProcessor = new XSLTProcessor();
+                        xsltProcessor.importStylesheet(xsl);
+                        resultDocument = xsltProcessor.transformToDocument(xml);
+                        
+                        
+                        var textarea = document.createElement('textarea');
+                        textarea.style.width = '400px';
+                        textarea.style.height = '400px';
+                        /*
+                            Maverick
+                            Using resultDocument.documentElement to remove an additional tag "<#document>" created by the XSLTProcessor.
+                        */
+                        textarea.value=mxUtils.getPrettyXml(resultDocument.documentElement);
+                        showModalWindow(graph, 'Xcos', textarea, 410, 440);
+                    }
+                });
+
+                addToolbarButton(editor, toolbar, 'exportXML', 'Export XML', 'images/export1.png');
+
+                addToolbarButton(editor, toolbar, 'exportXcos', 'Export Xcos', 'images/export1.png');
 
                 // Adds toolbar buttons into the status bar at the bottom
                 // of the window.
@@ -453,6 +525,8 @@
 
 
         function showPropertiesWindow(graph, cell) {
+
+            
 
             var name = cell.getAttribute('blockName');
             var defaultProperties = window[name]("get");
@@ -683,17 +757,6 @@
                         var details = ANDBLK("define");
 						var enc = new mxCodec(mxUtils.createXmlDocument());
 						var node = enc.encode(details);
-						var ret_data = ANDBLK("details");
-						console.log(ret_data);
-						//node.setAttribute('label',label);
-						var temp=enc.encode(parent);
-						node.setAttribute('parent',temp.getAttribute('id'));
-                        v1 = graph.insertVertex(parent, null, node, x, y, 80, 80, 'ANDBLK');
-                        createPorts(graph, v1, [], ['CONTROL', 'CONTROL'], [], ['COMMAND']);
-                    } else if(name == 'CFSCOPE') {
-                        var details = CFSCOPE("define");
-						var enc = new mxCodec(mxUtils.createXmlDocument());
-						var node = enc.encode(details);
 						//node.setAttribute('label',label);
 						var temp=enc.encode(parent);
 						node.setAttribute('parent',temp.getAttribute('id'));
@@ -834,10 +897,19 @@
                         v1 = graph.insertVertex(parent, null, 'Shift<BR>register', x, y, 80, 80, 'REGISTER');
                         createPorts(graph, v1, ['EXPLICIT'], ['CONTROL'], ['EXPLICIT'], []);
                     }
-
+					else if(name == 'CFSCOPE') {
+                        var details = CFSCOPE("define");
+						var enc = new mxCodec(mxUtils.createXmlDocument());
+						var node = enc.encode(details);
+						//node.setAttribute('label',label);
+						var temp=enc.encode(parent);
+						node.setAttribute('parent',temp.getAttribute('id'));
+                        v1 = graph.insertVertex(parent, null, node, x, y, 80, 80, 'ANDBLK');
+                        createPorts(graph, v1, [], ['CONTROL', 'CONTROL'], [], ['COMMAND']);
+                    }
                     // EVENTS
                     else if (name == 'CLOCK_c') {
-                        var details = CLOCK_c("define");
+						var details = CLOCK_c("define");
 						var enc = new mxCodec(mxUtils.createXmlDocument());
 						var node = enc.encode(details);
 						//node.setAttribute('label',label);
@@ -1468,6 +1540,9 @@
     <div id="outlineContainer" style="position:absolute;overflow:hidden;top:36px;right:0px;width:200px;height:140px;background:transparent;border-style:solid;border-color:black;">
     </div>
 
+    <!-- Maverick -->
+    <div id="example" style="font-size:100pt;color:red;"/>
+
     <!-- Creates a container for the sidebar -->
     <div id="statusContainer" style="text-align:right;position:absolute;overflow:hidden;bottom:0px;left:0px;max-height:24px;height:36px;right:0px;color:white;padding:6px;background-image:url('images/toolbar_bg.gif');">
         <div style="font-size:10pt;float:left;">
@@ -1479,6 +1554,9 @@
     <p class="accordion-expand-holder" style="display:none">
         <a id='toggleBlocks' class="accordion-expand-all">Expand All</a>
     </p>
+
+    
+    
 
 </body>
 <!-- It's good if this part happens after the entire page has loaded-->

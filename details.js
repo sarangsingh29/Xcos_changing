@@ -574,6 +574,7 @@ function CLOCK_c() {
     var diagram=scicos_diagram();
     diagram.objs.push(output_port);
     diagram.objs.push(evtdly);
+    diagram.objs.push(split);
     diagram.objs.push(scicos_link({
         xx: new ScilabDouble([340], [340],[380.71]),
         yy: new ScilabDouble([226.29],[172],[172]),
@@ -581,7 +582,6 @@ function CLOCK_c() {
         from: new ScilabDouble([2, 1]),
         to: new ScilabDouble([4, 1])
     }));
-    diagram.objs.push(split);
     diagram.objs.push(scicos_link({
         xx: new ScilabDouble([380.71],[399]),
         yy: new ScilabDouble([172],[172]),
@@ -631,11 +631,12 @@ function EVTDLY_c() {
         model.blocktype=new ScilabString(["d"]);
         model.firing=new ScilabDouble([ff]);
         model.dep_ut=new ScilabBoolean([false,false]);
-
+        // changed
+        model.outtyp = new ScilabDouble();
         var exprs=new ScilabString([dt],[ff]);
         var gr_i = new ScilabString(["xstringb(orig(1),orig(2),\"EVTDLY_c\",sz(1),sz(2));"]);
         var block = new standard_define(new ScilabDouble([80, 80]), model, new ScilabDouble(), gr_i); // 3,2 -> 80
-
+        block.graphics.style = new ScilabString(["EVTDLY_c"]);
         return block;
 }
 
