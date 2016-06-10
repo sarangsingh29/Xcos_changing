@@ -757,6 +757,9 @@
                         var details = ANDBLK("define");
 						var enc = new mxCodec(mxUtils.createXmlDocument());
 						var node = enc.encode(details);
+						var ans = ANDBLK("details");
+						console.log(ans);
+						//console.log(mav());
 						//node.setAttribute('label',label);
 						var temp=enc.encode(parent);
 						node.setAttribute('parent',temp.getAttribute('id'));

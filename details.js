@@ -296,38 +296,39 @@ function data() {
     this.realPart;
     this.value;
 }
-var c = [];
+
 function CONST_m() {
     
     switch (arguments[0]) {
         case "get":
-            var options = {vec:["Constant Value",c.toString()]};
+            var options = {vec:["Constant Value",this.c.toString()]};
             return options;
         case "set":
-            c = [arguments[2]["vec"]];
-			console.log(c);
+            this.c = [arguments[2]["vec"]];
 			var dec = new mxCodec();
 			var details = dec.decode(arguments[1]);
 			details.realParameters = new ScilabDouble();
-			details.exprs = new ScilabString([sci2exp(c)]);
+			details.exprs = new ScilabString([sci2exp(this.c)]);
+			this.x.realParameters = new ScilabDouble();
+			this.x.exprs = new ScilabString([sci2exp(this.c)]);
             return details;
         case "define":
-			c = [1];
+			this.c = [1];
             var model = scicos_model();
             model.sim = list(new ScilabString(["cstblk4"]), new ScilabDouble([4]));
             model.in = new ScilabDouble();
-            model.out = new ScilabDouble([c.length]);
+            model.out = new ScilabDouble([this.c.length]);
             model.in2 = new ScilabDouble();
-            model.out2 = new ScilabDouble([c.length]);
-            model.rpar = new ScilabDouble(c);
+            model.out2 = new ScilabDouble([this.c.length]);
+            model.rpar = new ScilabDouble(this.c);
             model.opar = list();
             model.blocktype = new ScilabString(["d"]);
             model.dep_ut = new ScilabBoolean([false, false]);
 
             var gr_i = new ScilabString(["xstringb(orig(1),orig(2),\"CONST_m\",sz(1),sz(2));"]);
-            var exprs = new ScilabString([sci2exp(c)]);
-            var block = new standard_define(new ScilabDouble([80, 80]), model, exprs, gr_i); // 1 -> 80
-            block.graphics.style = new ScilabString(["CONST_m"]);
+            var exprs = new ScilabString([sci2exp(this.c)]);
+            this.x= new standard_define(new ScilabDouble([80, 80]), model, exprs, gr_i); // 1 -> 80
+            this.x.graphics.style = new ScilabString(["CONST_m"]);
             var attributes = {
                 style: "CONST_m",
                 simulationFunctionName: "cstblk4",
@@ -335,9 +336,14 @@ function CONST_m() {
                 blockType: "d",
                 interfaceFunctionName: "CONST_m",
 				blockName: "CONST_m",
-				blockElementName: "CONST_m"
+				blockElementName: "CONST_m",
+        		realParameters : this.x.model.rpar,
+        		integerParameters : this.x.model.ipar,
+        		exprs : this.x.graphics.exprs
             };
-            return new BasicBlock(attributes, model.rpar, exprs);
+            return new BasicBlock(attributes);
+       
+            
     }
 }
 
@@ -365,6 +371,7 @@ function ANDLOG_f() {
 }
 
 function ANDBLK() {
+    
     switch(arguments[0])
     {
         case "define":
@@ -474,19 +481,19 @@ function ANDBLK() {
                 from: new ScilabDouble([6, 2, 0]),
                 to: new ScilabDouble([5, 1, 1])
             }));
-            var x = scicos_block();
-            x.gui = new ScilabString(["ANDBLK"]);
-            x.graphics.sz = new ScilabDouble([2, 2]);
-            x.graphics.gr_i = new ScilabDouble();
-            x.graphics.pein = new ScilabDouble([0, 0]);
-            x.graphics.peout = new ScilabDouble([0]);
-            x.model.sim = new ScilabString(["csuper"]);
-            x.model.evtin = new ScilabDouble([1, 1]);
-            x.model.evtout = new ScilabDouble([1]);
-            x.model.blocktype = new ScilabString(["h"]);
-            x.model.firing = new ScilabBoolean([false]);
-            x.model.dep_ut = new ScilabBoolean([false, false]);
-            x.model.rpar = diagram;
+            this.x = scicos_block();
+            this.x.gui = new ScilabString(["ANDBLK"]);
+            this.x.graphics.sz = new ScilabDouble([2, 2]);
+            this.x.graphics.gr_i = new ScilabDouble();
+            this.x.graphics.pein = new ScilabDouble([0, 0]);
+            this.x.graphics.peout = new ScilabDouble([0]);
+            this.x.model.sim = new ScilabString(["csuper"]);
+            this.x.model.evtin = new ScilabDouble([1, 1]);
+            this.x.model.evtout = new ScilabDouble([1]);
+            this.x.model.blocktype = new ScilabString(["h"]);
+            this.x.model.firing = new ScilabBoolean([false]);
+            this.x.model.dep_ut = new ScilabBoolean([false, false]);
+            this.x.model.rpar = diagram;
             var attributes = {
                 style: "ANDBLK",
                 simulationFunctionName: "csuper",
@@ -494,46 +501,52 @@ function ANDBLK() {
                 blockType: "h",
                 interfaceFunctionName: "ANDBLK",
         		blockName: "ANDBLK",
-        		blockElementName: "ANDBLK"
+        		blockElementName: "ANDBLK",
+        		realParameters : this.x.model.rpar,
+        		integerParameters : this.x.model.ipar,
+        		exprs : this.x.graphics.exprs
             };
-            return new BasicBlock(attributes, x.model.rpar, x.graphics.exprs);
+            return new BasicBlock(attributes);
         
         case "details":
-            return x;
+            return this.x;
     }
+    
 }
 
-var win=-1;
-var wdim=[[600],[400]];
-var wpos=[[-1],[-1]];
-var clrs=[[1],[3],[5],[7],[9],[11],[13],[15]];
-var N=2;
-var ymin=-15;
-var ymax=15;
-var per=30;
+
+
 function CFSCOPE() {
     switch(arguments[0])
     {
         case "define":
+            this.win=-1;
+            this.wdim=[[600],[400]];
+            this.wpos=[[-1],[-1]];
+            this.clrs=[[1],[3],[5],[7],[9],[11],[13],[15]];
+            this.N=2;
+            this.ymin=-15;
+            this.ymax=15;
+            this.per=30;
             var model=scicos_model();
             model.sim=list(new ScilabString(["cfscope"]),new ScilabDouble([4]));
             model.evtin=new ScilabDouble([1]);
-            model.rpar=new ScilabDouble([0],[ymin],[ymax],[per]);
-            model.ipar=new ScilabDouble([win],[1],[N],...clrs,...wpos,...wdim,[1],[1]);
+            model.rpar=new ScilabDouble([0],[this.ymin],[this.ymax],[this.per]);
+            model.ipar=new ScilabDouble([this.win],[1],[this.N],...this.clrs,...this.wpos,...this.wdim,[1],[1]);
             model.blocktype=new ScilabString(["c"]);
             model.dep_ut=new ScilabBoolean([true,false]);
-            var  exprs=new ScilabString([clrs.toString().replace(/,/g, " ")],
-            [win],
+            var  exprs=new ScilabString([this.clrs.toString().replace(/,/g, " ")],
+            [this.win],
             [sci2exp([])],
-            [sci2exp(wdim)],
-            [ymin],
-            [ymax],
-            [per],
-            [N],
+            [sci2exp(this.wdim)],
+            [this.ymin],
+            [this.ymax],
+            [this.per],
+            [this.N],
             [1]);
             var gr_i = list(new ScilabString(["xstringb(orig(1),orig(2),\"CFSCOPE\",sz(1),sz(2));"]),new ScilabDouble([8]));
-            var x = new standard_define(new ScilabDouble([80, 80]), model, exprs, gr_i); // 2 -> 80
-            x.graphics.style = new ScilabString(["CFSCOPE"]);
+            this.x = new standard_define(new ScilabDouble([80, 80]), model, exprs, gr_i); // 2 -> 80
+            this.x.graphics.style = new ScilabString(["CFSCOPE"]);
             var attributes = {
                 style: "CFSCOPE",
                 simulationFunctionName: "cfscope",
@@ -542,9 +555,11 @@ function CFSCOPE() {
                 interfaceFunctionName: "CFSCOPE",
         		blockName: "CFSCOPE",
         		blockElementName: "CFSCOPE",
-        		integerParameters: model.ipar
+        		realParameters : this.x.model.rpar,
+        		integerParameters : this.x.model.ipar,
+        		exprs : this.x.graphics.exprs
             };
-            return new BasicBlock(attributes, model.rpar, exprs);
+            return new BasicBlock(attributes);
     }
 }
 
@@ -563,7 +578,7 @@ function CLOCK_c() {
     evtdly.doc = list(new ScilabString([cnt++]));
     evtdly.model.evtin = new ScilabDouble([-1]);
     evtdly.model.evtout = new ScilabDouble([-1]);
-    evtdly.model.peout = new ScilabDouble([4]);
+    evtdly.graphics.peout = new ScilabDouble([4]);
 
     var output_port=CLKOUT_f("define");
     output_port.graphics.orig=new ScilabDouble([399,162]);
@@ -583,7 +598,7 @@ function CLOCK_c() {
     split.model.uid = new ScilabString([cnt]);
     split.doc = list(new ScilabString([cnt++]));
     //changed
-    split.model.pein = new ScilabDouble([4]);
+    split.graphics.pein = new ScilabDouble([4]);
 
     var diagram=scicos_diagram();
     diagram.objs.push(output_port);
@@ -611,16 +626,16 @@ function CLOCK_c() {
         to: new ScilabDouble([2, 1, 1])
     }));
     var x=scicos_block();
-    x.gui=new ScilabString(["CLOCK_c"]);
-    x.graphics.sz=new ScilabDouble([2,2]);
-    x.graphics.gr_i=new ScilabString([]);
-    x.graphics.peout=new ScilabDouble([0]);
-    x.model.sim=new ScilabString(["csuper"]);
-    x.model.evtout=new ScilabDouble([1]);
-    x.model.blocktype=new ScilabString(["h"]);
-    x.model.firing=new ScilabBoolean([false]);
-    x.model.dep_ut=new ScilabBoolean([false, false]);
-    x.model.rpar=diagram;
+    this.x.gui=new ScilabString(["CLOCK_c"]);
+    this.x.graphics.sz=new ScilabDouble([2,2]);
+    this.x.graphics.gr_i=new ScilabString([]);
+    this.x.graphics.peout=new ScilabDouble([0]);
+    this.x.model.sim=new ScilabString(["csuper"]);
+    this.x.model.evtout=new ScilabDouble([1]);
+    this.x.model.blocktype=new ScilabString(["h"]);
+    this.x.model.firing=new ScilabBoolean([false]);
+    this.x.model.dep_ut=new ScilabBoolean([false, false]);
+    this.x.model.rpar=diagram;
 
     var attributes = {
         style: "CLOCK_c",
@@ -629,9 +644,12 @@ function CLOCK_c() {
         blockType: "h",
         interfaceFunctionName: "CLOCK_c",
 		blockName: "CLOCK_c",
-		blockElementName: "CLOCK_c"
+		blockElementName: "CLOCK_c",
+		realParameters : this.x.model.rpar,
+		integerParameters : this.x.model.ipar,
+		exprs : this.x.graphics.exprs
     };
-    return new BasicBlock(attributes, x.model.rpar, x.graphics.exprs);
+    return new BasicBlock(attributes);
 }
 
 function EVTDLY_c() {
@@ -758,8 +776,8 @@ function BasicBlock() {
     this.value = options.value || "";
     this.vertex = options.vertex || "";
     this.visible = options.visible || "";
-    this.exprs = arguments[2] || "";
-    this.realParameters = arguments[1] || "";
+    this.exprs = options.exprs || "";
+    this.realParameters = options.realParameters || "";
     this.integerParameters = options.integerParameters || new ScilabDouble();
     this.objectsParameters = list();
     this.nbZerosCrossing = new ScilabDouble([0]);
