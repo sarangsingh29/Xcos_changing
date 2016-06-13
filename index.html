@@ -29,25 +29,6 @@
     <script type="text/javascript" src="json2.js"></script>
     <script type="text/javascript">
 
-        /*
-            Maverick
-            This method is used for loading the stylesheet from the file.
-            Reference: http://www.w3schools.com/xsl/xsl_client.asp
-        */
-
-        function loadXMLDoc(filename) {
-             if (window.ActiveXObject) {
-                 xhttp = new ActiveXObject("Msxml2.XMLHTTP");
-             } else {
-                 xhttp = new XMLHttpRequest();
-             }
-             xhttp.open("GET", filename, false);
-             try {
-                 xhttp.responseType = "msxml-document"
-             } catch (err) {}
-             xhttp.send("");
-             return xhttp.responseXML;
-         }
 
         function main(container, outline, toolbar, sidebar, status) {
             // Checks if the browser is supported
@@ -353,6 +334,28 @@
 
                 toolbar.appendChild(spacer.cloneNode(true));
 
+
+                /*
+		            Maverick
+		            This method is used for loading the stylesheet from the file.
+		            Reference: http://www.w3schools.com/xsl/xsl_client.asp
+		        */
+
+		        function loadXMLDoc(filename) {
+		             if (window.ActiveXObject) {
+		                 xhttp = new ActiveXObject("Msxml2.XMLHTTP");
+		             } else {
+		                 xhttp = new XMLHttpRequest();
+		             }
+		             xhttp.open("GET", filename, false);
+		             try {
+		                 xhttp.responseType = "msxml-document"
+		             } catch (err) {}
+		             xhttp.send("");
+		             return xhttp.responseXML;
+		         }
+
+
                 /*
                     Maverick
                     Defining a variable to used by both the export buttons.
@@ -360,29 +363,40 @@
                     is subsequently used by the ExportXCOS button.
                 */
 
-                var xmlFromExportXML=null;
-
-                // Defines a new export action
-                editor.addAction('exportXML', function(editor, cell) {
-                    var textarea = document.createElement('textarea');
+                function xmlOrXcos()
+                {
+                	var textarea = document.createElement('textarea');
                     textarea.style.width = '400px';
                     textarea.style.height = '400px';
 
                     var enc = new mxCodec(mxUtils.createXmlDocument());
-                    var node = enc.encode(editor.graph.getModel());
+                    var node = enc.encode(arguments[0].graph.getModel());
 
                    
                     //console.log(mxUtils.getPrettyXml(node));
                     textarea.value = mxUtils.getPrettyXml(node);
-                    xmlFromExportXML=mxUtils.getXml(node);
-                    showModalWindow(graph, 'XML', textarea, 410, 440);
+
+                    if(arguments[2]==null)
+                    {
+                    	showModalWindow(graph, 'XML', textarea, 410, 440);
+                	}
+                	else
+                	{
+                		return mxUtils.getXml(node);
+                	}
+                }
+
+
+                // Defines a new export action
+                editor.addAction('exportXML', function(editor, cell) {
+                    xmlOrXcos(editor,cell);
                 });
 
                /* Maverick
                 Reference: http://www.w3schools.com/xsl/xsl_client.asp*/
 
-                editor.addAction('exportXcos', function() {
-                    editor.execute('exportXML');
+                editor.addAction('exportXcos', function(editor,cell) {
+                    var xmlFromExportXML=xmlOrXcos(editor,cell,true);
                     if(xmlFromExportXML==null) alert('First create the XML file.');
                     else
                     {
@@ -391,7 +405,7 @@
                          Adding <mxGraphModel> tag to make up for the missing tag.
                         */
 
-                        var xml=mxUtils.parseXml("<mxGraphModel>"+xmlFromExportXML+"</mxGraphModel>");
+                        var xml=mxUtils.parseXml("<XcosDiagram><mxGraphModel>"+xmlFromExportXML+"</mxGraphModel></XcosDiagram>");
 
                         var xsl=loadXMLDoc("finalmodsheet.xsl");
 
@@ -766,7 +780,18 @@
                         v1 = graph.insertVertex(parent, null, node, x, y, 80, 80, 'ANDBLK');
                         createPorts(graph, v1, [], ['CONTROL', 'CONTROL'], [], ['COMMAND']);
                     } else if (name == 'CMSCOPE') {
-                        v1 = graph.insertVertex(parent, null, label, x, y, 80, 80, 'CMSCOPE');
+
+
+                        var details = CMSCOPE("define");
+                        var enc = new mxCodec(mxUtils.createXmlDocument());
+                        var node = enc.encode(details);
+                        //node.setAttribute('label',label);
+                        var temp=enc.encode(parent);
+                        node.setAttribute('parent',temp.getAttribute('id'));
+
+
+
+                        v1 = graph.insertVertex(parent, null, node, x, y, 80, 80, 'CMSCOPE');
                         createPorts(graph, v1, ['EXPLICIT', 'EXPLICIT'], ['CONTROL'], [], []);
                     } else if (name == 'CONST_m') {
                         var details = CONST_m("define");
@@ -1134,7 +1159,7 @@
                     var x = 0;
                     var y = (i / (leftNumber + 1)).toFixed(4);
                     var portType = leftArray[i - 1];
-                    createInputPort(graph, block, x, y, portType, 'left');
+                    createInputPort(graph, block, x, y, portType, 'left',i);
                 }
             }
             if (topNumber != 0) {
@@ -1142,7 +1167,7 @@
                     var x = (i / (topNumber + 1)).toFixed(4);
                     var y = 0;
                     var portType = topArray[i - 1];
-                    createInputPort(graph, block, x, y, portType, 'top');
+                    createInputPort(graph, block, x, y, portType, 'top',i);
                 }
             }
         };
@@ -1155,7 +1180,7 @@
                     var x = 1;
                     var y = (i / (rightNumber + 1)).toFixed(4);
                     var portType = rightArray[i - 1];
-                    createOutputPort(graph, block, x, y, portType, 'right');
+                    createOutputPort(graph, block, x, y, portType, 'right',i);
                 }
             }
             if (bottomNumber != 0) {
@@ -1163,12 +1188,12 @@
                     var x = (i / (bottomNumber + 1)).toFixed(4);
                     var y = 1;
                     var portType = bottomArray[i - 1];
-                    createOutputPort(graph, block, x, y, portType, 'bottom');
+                    createOutputPort(graph, block, x, y, portType, 'bottom',i);
                 }
             }
         };
 
-        function createInputPort(graph, block, x, y, portType, position) {
+        function createInputPort(graph, block, x, y, portType, position, ordering) {
             var port = null;
             if (portType == 'COMMAND') {
                 port = graph.insertVertex(block, null, 'CommandPort', x, y, 10, 10, 'CommandPort', true);
@@ -1185,10 +1210,11 @@
                 } else if (position == 'left') {
                     port.geometry.offset = new mxPoint(-10, -6);
                 }
+                port.ordering=ordering;
             }
         };
 
-        function createOutputPort(graph, block, x, y, portType, position) {
+        function createOutputPort(graph, block, x, y, portType, position, ordering) {
             var port = null;
             if (portType == 'COMMAND') {
                 port = graph.insertVertex(block, null, 'CommandPort', x, y, 10, 10, 'CommandPort', true);
@@ -1206,6 +1232,7 @@
                 if (position == 'right') {
                     port.geometry.offset = new mxPoint(0, -6);
                 }
+                port.ordering=ordering;
             }
         };
 
@@ -1542,9 +1569,6 @@
     <!-- Creates a container for the outline -->
     <div id="outlineContainer" style="position:absolute;overflow:hidden;top:36px;right:0px;width:200px;height:140px;background:transparent;border-style:solid;border-color:black;">
     </div>
-
-    <!-- Maverick -->
-    <div id="example" style="font-size:100pt;color:red;"/>
 
     <!-- Creates a container for the sidebar -->
     <div id="statusContainer" style="text-align:right;position:absolute;overflow:hidden;bottom:0px;left:0px;max-height:24px;height:36px;right:0px;color:white;padding:6px;background-image:url('images/toolbar_bg.gif');">
