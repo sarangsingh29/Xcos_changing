@@ -363,17 +363,28 @@
                     is subsequently used by the ExportXCOS button.
                 */
 
+                function XcosDiagram()
+                {
+                    this.model=arguments[0];
+                    this.finalIntegrationTime=arguments[1];
+                }
+
                 function xmlOrXcos()
                 {
                 	var textarea = document.createElement('textarea');
                     textarea.style.width = '400px';
                     textarea.style.height = '400px';
 
-                    var enc = new mxCodec(mxUtils.createXmlDocument());
-                    var node = enc.encode(arguments[0].graph.getModel());
-
                    
-                    //console.log(mxUtils.getPrettyXml(node));
+
+                    var diagRoot=new XcosDiagram(arguments[0].graph.getModel(),"10");
+                    
+
+                    var enc = new mxCodec(mxUtils.createXmlDocument());
+                    var node = enc.encode(diagRoot);
+                 
+                   
+            
                     textarea.value = mxUtils.getPrettyXml(node);
 
                     if(arguments[2]==null)
@@ -382,7 +393,7 @@
                 	}
                 	else
                 	{
-                		return mxUtils.getXml(node);
+                		return mxUtils.getPrettyXml(node);
                 	}
                 }
 
@@ -397,6 +408,7 @@
 
                 editor.addAction('exportXcos', function(editor,cell) {
                     var xmlFromExportXML=xmlOrXcos(editor,cell,true);
+
                     if(xmlFromExportXML==null) alert('First create the XML file.');
                     else
                     {
@@ -405,14 +417,13 @@
                          Adding <mxGraphModel> tag to make up for the missing tag.
                         */
 
-                        var xml=mxUtils.parseXml("<XcosDiagram><mxGraphModel>"+xmlFromExportXML+"</mxGraphModel></XcosDiagram>");
+                        var xml=mxUtils.parseXml(xmlFromExportXML);
 
                         var xsl=loadXMLDoc("finalmodsheet.xsl");
 
                         xsltProcessor = new XSLTProcessor();
                         xsltProcessor.importStylesheet(xsl);
                         resultDocument = xsltProcessor.transformToDocument(xml);
-                        
                         
                         var textarea = document.createElement('textarea');
                         textarea.style.width = '400px';
@@ -772,7 +783,7 @@
 						var enc = new mxCodec(mxUtils.createXmlDocument());
 						var node = enc.encode(details);
 						var ans = ANDBLK("details");
-						console.log(ans);
+						//console.log(ans);
 						//console.log(mav());
 						//node.setAttribute('label',label);
 						var temp=enc.encode(parent);
